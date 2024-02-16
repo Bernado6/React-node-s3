@@ -1,6 +1,7 @@
-import { Box, Button, Text, Input } from '@chakra-ui/react';
+import { Box, Button, Text, Input, CircularProgress, SimpleGrid, Image } from '@chakra-ui/react';
 import { useState } from 'react';
 import useMutation from '../hooks/useMutations';
+import useQuery from '../hooks/useQuery';
 
 const validFileTypes = ['image/jpg', 'image/jpeg', 'image/png']
 const URL = 'http://localhost:4000/images';
@@ -16,6 +17,10 @@ const Posts = () => {
     mutate: uploadImage,
     isLoading: uploading,
     error: uploadError} = useMutation({url: URL})
+
+  const {data: imageUrls =[],
+         isLoading: imagesLoading,
+         error: fetchError} = useQuery(URL)
 
   const [error, setError] = useState('')
 
@@ -53,6 +58,27 @@ const Posts = () => {
       <Text textAlign="left" mb={4}>
         Posts
       </Text>
+      {imagesLoading && 
+        <CircularProgress
+          color='gray.600'
+          trackColor='blue.300'
+          size={7}
+          thickness={10}
+          isIndeterminate
+        />}
+      {fetchError && (<ErrorText textAlign='left'>Failed to load images</ErrorText>)}
+
+      {!fetchError && imageUrls?.length===0 && (
+        <Text textAlign="left" fontSize='lg' color='gray.500'>
+          No images found
+        </Text>
+      )}
+
+      <SimpleGrid columns={[1,2,3]} spacing={4}>
+       {imageUrls?.length > 0 && imageUrls.map(url => (
+                              <Image borderRadius={5} src={url} alt='Image' key={url}/>
+                              ))}
+      </SimpleGrid>
     </Box>
   );
 };

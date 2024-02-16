@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { json } from "express";
 import cors from "cors";
 import multer from "multer";
-import { uploadToS3 } from "./s3.mjs";
+import { getUserPresignedUrls, uploadToS3 } from "./s3.mjs";
 
 const app = express();
 
@@ -17,6 +17,17 @@ app.use(
   })
 );
 app.use(json());
+
+app.get("/images", upload.single('image'), async (req, res) => {
+  const userId = req.headers["x-user-id"];
+
+  if (!userId) return res.status(400).send({ message:"Bad Request" })
+  const {error, presignedUrls} = await getUserPresignedUrls(userId);
+  if (error) return res.status(400).json({message: error.message});
+  return res.status(200).json(presignedUrls)
+
+});
+
 
 app.post("/images", upload.single('image'), (req, res) => {
   const {file} = req;
