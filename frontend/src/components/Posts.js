@@ -13,6 +13,7 @@ const ErrorText = ({ children, ...props }) => (
 );
 
 const Posts = () => {
+  const [refetch, setRefetch] = useState(0);
   const {
     mutate: uploadImage,
     isLoading: uploading,
@@ -20,7 +21,7 @@ const Posts = () => {
 
   const {data: imageUrls =[],
          isLoading: imagesLoading,
-         error: fetchError} = useQuery(URL)
+         error: fetchError} = useQuery(URL, refetch)
 
   const [error, setError] = useState('')
 
@@ -36,7 +37,9 @@ const Posts = () => {
     form.append('image', file);
 
     await uploadImage(form);
-
+    setTimeout(() => {
+      setRefetch(s => s+1);
+    }, 1000)
   };
 
   return (
